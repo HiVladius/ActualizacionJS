@@ -1,12 +1,21 @@
 function iniciarApp() {
   // Seleccionar el formulario
-  const selectCategorias = document.querySelector("#categorias");
-  selectCategorias.addEventListener("change", manejarSeleccionCategoria);
 
   const resultado = document.querySelector("#resultado");
-  const modal = new bootstrap.Modal("#modal", {});
+  const selectCategorias = document.querySelector("#categorias");
 
-  obtenerCategorias();
+  if (selectCategorias) {
+    selectCategorias.addEventListener("change", manejarSeleccionCategoria);
+    obtenerCategorias();
+  }
+
+  const favoritosDiv = document.querySelector(".favoritos");
+  if (favoritosDiv) {
+    obtenerFavoritos();
+  }
+
+  
+  const modal = new bootstrap.Modal("#modal", {});
 
   function obtenerCategorias() {
     const url = "https://www.themealdb.com/api/json/v1/1/categories.php"; // URL de la API
@@ -128,25 +137,86 @@ function iniciarApp() {
     modalBody.appendChild(listGroup);
 
     // Mostrar el footer del modal
-
     const modalFooter = document.querySelector(".modal-footer");
     limpiarHTML(modalFooter);
 
     //Boton de cerrar y faborito
     const btnFavorito = document.createElement("button");
     btnFavorito.classList.add("btn", "btn-danger", "col");
-    btnFavorito.textContent = "Guardar favoritos";
+    btnFavorito.textContent = existeStorage(idMeal)
+      ? "Eliminar  favorito"
+      : "Agregar a favoritos";
+
+    // Almacena en el local storage
+    btnFavorito.onclick = () => {
+      if (existeStorage(idMeal)) {
+        eliminarFavorito(idMeal);
+        btnFavorito.textContent = "Agregar a favoritos";
+        mostrarToast("Se elimino de favoritos");
+        return;
+      }
+
+      agregarFavorito({
+        idMeal,
+        strMeal,
+        strMealThumb,
+      });
+      btnFavorito.textContent = "Eliminar favorito";
+      mostrarToast("Se agrego a favoritos");
+    };
 
     const btnCerrrarModal = document.createElement("button");
     btnCerrrarModal.classList.add("btn", "btn-secondary", "col");
     btnCerrrarModal.textContent = "Cerrar";
-    btnCerrrarModal.setAttribute("data-bs-dismiss", "modal");
+    btnCerrrarModal.onclick = () => {
+      modal.hide();
+    };
 
     modalFooter.appendChild(btnFavorito);
     modalFooter.appendChild(btnCerrrarModal);
 
     // Muestra el modal
     modal.show();
+  }
+
+  function agregarFavorito(receta) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    localStorage.setItem("favoritos", JSON.stringify([...favoritos, receta]));
+  }
+
+  function eliminarFavorito(id) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    const nuevosFavoritos = favoritos.filter(
+      (favorito) => favorito.idMeal !== id
+    );
+    localStorage.setItem("favoritos", JSON.stringify(nuevosFavoritos));
+  }
+
+  function existeStorage(id) {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+    return favoritos.some((favorito) => favorito.idMeal === id);
+  }
+
+  function mostrarToast(mensaje) {
+    const toastDiv = document.querySelector(".toast");
+    const toastBody = document.querySelector(".toast-body");
+    const toast = new bootstrap.Toast(toastDiv);
+    toastBody.textContent = mensaje;
+    toast.show();
+  }
+
+  function obtenerFavoritos() {
+    const favoritos = JSON.parse(localStorage.getItem("favoritos")) ?? [];
+   console.log(favoritos);
+    if (favoritos.length) {
+      obtenerRecetas(favoritos);
+      return 
+    }
+
+    const noFavoritos = document.createElement("p");
+    noFavoritos.textContent = "No hay favoritos";
+    noFavoritos.classList.add("fs-4", "text-center", "font-bold", "mt-5");
+    favoritosDiv.appendChild(noFavoritos);
   }
 
   function limpiarHTML(selector) {
