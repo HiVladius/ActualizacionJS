@@ -84,6 +84,7 @@ function consultarAPI() {
   mostrarSpinner();
 
   fetch(url)
+  
     .then((respuesta) => respuesta.json())
     .then((cotizacion) => {
       mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
