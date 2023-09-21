@@ -17,6 +17,10 @@ function descargarClientes(){
 
 // Async await
 
+// async function ejecutar (){
+    
+// }
+
 const ejecutar = async () => {
     try{
         console.log(1 + 1);
