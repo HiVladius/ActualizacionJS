@@ -1,3 +1,7 @@
+// Funciones de Orden Superior en JS
+// Map
+
+
 const carrito = [
     { nombre: 'Monitor 20 Pulgadas', precio: 500},
     { nombre: 'Televisión 50 Pulgadas', precio: 700},
@@ -8,3 +12,12 @@ const carrito = [
     { nombre: 'Bocinas', precio: 300},
     { nombre: 'Laptop', precio: 800},
 ];
+
+
+const obtneerListado = producto =>{
+    return producto.precio;
+}
+
+const resultado = carrito.map(obtneerListado);
+
+console.log(resultado);
